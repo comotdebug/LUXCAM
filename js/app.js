@@ -982,4 +982,172 @@ function renderChart() {
             return `
                 <div class="chart-column">
 
-         
+                    <div
+                        class="chart-bar"
+                        style="height:${height}%"
+                    ></div>
+
+                    <span class="chart-label">
+                        ${["Sen","Sel","Rab","Kam","Jum","Sab","Min"][i]}
+                    </span>
+
+                </div>
+            `;
+
+        }).join("");
+}
+
+
+/* STOCK */
+
+function renderStock() {
+
+    const list =
+        document.getElementById("stockList");
+
+    if (!list) return;
+
+    list.innerHTML = products.map(p => {
+
+        const s = stock[p.id] ?? 0;
+
+        const percent =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    (s / p.stock) * 100
+                )
+            );
+
+        return `
+            <div class="stock-item">
+
+                <div class="stock-top">
+
+                    <span>${p.name}</span>
+
+                    <strong>${s}</strong>
+
+                </div>
+
+                <div class="stock-progress">
+
+                    <span
+                        style="width:${percent}%"
+                    ></span>
+
+                </div>
+
+            </div>
+        `;
+
+    }).join("");
+}
+
+
+/* ORDERS */
+
+function renderOrders() {
+
+    const table =
+        document.getElementById("ordersTable");
+
+    if (!table) return;
+
+    if (!orders.length) {
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    Belum ada transaksi.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    table.innerHTML =
+        orders.slice(0,15).map(order => {
+
+            const items =
+                order.items.map(item => {
+
+                    const p = product(item.id);
+
+                    return `${p.name} ×${item.qty}`;
+
+                }).join(", ");
+
+            return `
+                <tr>
+
+                    <td>${order.id}</td>
+
+                    <td>${order.customer}</td>
+
+                    <td>${items}</td>
+
+                    <td>${rupiah(order.total)}</td>
+
+                    <td class="status-paid">
+                        ● ${order.status}
+                    </td>
+
+                </tr>
+            `;
+
+        }).join("");
+}
+
+
+/* RESET */
+
+function resetDemo() {
+
+    if (!confirm("Reset semua data demo?")) return;
+
+    orders = [];
+    cart = [];
+
+    stock = {};
+
+    products.forEach(p => {
+        stock[p.id] = p.stock;
+    });
+
+    save();
+
+    updateCart();
+    renderAdmin();
+    renderProducts();
+
+    toast("Data demo direset.");
+}
+
+
+/* MODAL CLICK */
+
+document.addEventListener("click",e => {
+
+    if (e.target.classList.contains("modal")) {
+        e.target.classList.add("hidden");
+    }
+
+});
+
+
+/* ESC */
+
+document.addEventListener("keydown",e => {
+
+    if (e.key === "Escape") {
+
+        document
+            .querySelectorAll(".modal")
+            .forEach(m => m.classList.add("hidden"));
+
+    }
+
+});
