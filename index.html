@@ -508,6 +508,181 @@
             </section>
 
 
+            <!-- =========================
+                 INVENTORY MANAGEMENT
+            ========================== -->
+
+            <section class="admin-management">
+
+                <div class="admin-management-header">
+                    <div>
+                        <p class="label">INVENTORY CONTROL</p>
+                        <h2>Kelola <span>Barang.</span></h2>
+                        <p>Tambah, edit, hapus barang, lihat harga beli/jual dan stok.</p>
+                    </div>
+                </div>
+
+                <div class="admin-management-grid">
+
+                    <div class="dashboard-card admin-form-card">
+                        <div class="dashboard-title">
+                            <h3 id="adminProductFormTitle">Input Barang</h3>
+                            <span>Product</span>
+                        </div>
+
+                        <form id="adminProductForm" onsubmit="adminProductSubmit(event)">
+                            <input type="hidden" id="adminProductId">
+
+                            <label>Nama Barang
+                                <input id="adminProductName" required placeholder="Contoh: Sony A7 IV">
+                            </label>
+
+                            <label>Kategori
+                                <select id="adminProductCategory" required>
+                                    <option value="">Pilih kategori</option>
+                                    <option>Kamera</option>
+                                    <option>Lensa</option>
+                                    <option>Audio</option>
+                                    <option>Aksesori</option>
+                                    <option>Tripod</option>
+                                    <option>Lighting</option>
+                                    <option>Drone</option>
+                                </select>
+                            </label>
+
+                            <div class="admin-form-two">
+                                <label>Harga Beli
+                                    <input id="adminProductBuyPrice" type="number" min="0" required placeholder="0">
+                                </label>
+                                <label>Harga Jual
+                                    <input id="adminProductSellPrice" type="number" min="0" required placeholder="0">
+                                </label>
+                            </div>
+
+                            <div class="admin-form-two">
+                                <label>Stok
+                                    <input id="adminProductStock" type="number" min="0" required placeholder="0">
+                                </label>
+                                <label>Badge
+                                    <input id="adminProductBadge" placeholder="NEW">
+                                </label>
+                            </div>
+
+                            <label>Supplier
+                                <input id="adminProductSupplier" placeholder="Nama supplier">
+                            </label>
+
+                            <label>URL Foto (opsional)
+                                <input id="adminProductImage" type="url" placeholder="https://..."></label>
+
+                            <div class="admin-form-actions">
+                                <button class="primary-button" id="adminProductSubmit" type="submit">Tambah Barang</button>
+                                <button class="secondary-button" type="button" onclick="resetAdminProductForm()">Batal</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="dashboard-card admin-table-card">
+                        <div class="dashboard-title">
+                            <h3>Harga & Stok Barang</h3>
+                            <span>Live</span>
+                        </div>
+                        <div class="table-wrapper admin-table-scroll">
+                            <table class="admin-data-table">
+                                <thead><tr>
+                                    <th>Barang</th><th>Harga Beli</th><th>Harga Jual</th><th>Margin</th><th>Stok</th><th>Supplier</th><th>Aksi</th>
+                                </tr></thead>
+                                <tbody id="adminProductsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+
+            <!-- =========================
+                 SUPPLIER MANAGEMENT
+            ========================== -->
+
+            <section class="admin-management">
+                <div class="admin-management-header">
+                    <div>
+                        <p class="label">SUPPLIER</p>
+                        <h2>Data <span>Supplier.</span></h2>
+                    </div>
+                </div>
+
+                <div class="admin-management-grid">
+                    <div class="dashboard-card admin-form-card">
+                        <div class="dashboard-title"><h3>Tambah Supplier</h3><span>Partner</span></div>
+                        <form id="supplierForm" onsubmit="addSupplier(event)">
+                            <label>Nama Supplier<input id="supplierName" required placeholder="PT Contoh Indonesia"></label>
+                            <label>Nomor Kontak<input id="supplierPhone" placeholder="08xxxxxxxxxx"></label>
+                            <label>Alamat<textarea id="supplierAddress" rows="4" placeholder="Alamat supplier"></textarea></label>
+                            <button class="primary-button full" type="submit">Tambah Supplier</button>
+                        </form>
+                    </div>
+
+                    <div class="dashboard-card admin-table-card">
+                        <div class="dashboard-title"><h3>Daftar Supplier</h3><span id="supplierCount">0 supplier</span></div>
+                        <div class="table-wrapper admin-table-scroll">
+                            <table class="admin-data-table">
+                                <thead><tr><th>Nama</th><th>Kontak</th><th>Alamat</th><th>Aksi</th></tr></thead>
+                                <tbody id="suppliersTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- =========================
+                 PURCHASE MANAGEMENT
+            ========================== -->
+
+            <section class="admin-management">
+                <div class="admin-management-header">
+                    <div>
+                        <p class="label">PURCHASING</p>
+                        <h2>Pembelian <span>Barang.</span></h2>
+                        <p>Catat barang yang dibeli dari supplier. Stok otomatis bertambah.</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-card admin-form-card purchase-form-card">
+                    <form id="purchaseForm" onsubmit="recordPurchase(event)">
+                        <div class="admin-form-two admin-form-four">
+                            <label>Barang
+                                <select id="purchaseProduct" required>
+                                    <option value="">Pilih barang</option>
+                                </select>
+                            </label>
+                            <label>Supplier
+                                <select id="purchaseSupplier" required><option value="">Pilih supplier</option></select>
+                            </label>
+                            <label>Jumlah
+                                <input id="purchaseQty" type="number" min="1" required placeholder="1">
+                            </label>
+                            <label>Harga Beli / Unit
+                                <input id="purchaseUnitPrice" type="number" min="0" required placeholder="0">
+                            </label>
+                        </div>
+                        <button class="primary-button" type="submit">Catat Pembelian</button>
+                    </form>
+                </div>
+
+                <div class="dashboard-card admin-table-card admin-purchase-table">
+                    <div class="dashboard-title"><h3>Riwayat Pembelian Supplier</h3><span>30 terbaru</span></div>
+                    <div class="table-wrapper admin-table-scroll">
+                        <table class="admin-data-table">
+                            <thead><tr><th>ID</th><th>Tanggal</th><th>Barang</th><th>Supplier</th><th>Qty</th><th>Harga Unit</th><th>Total</th></tr></thead>
+                            <tbody id="purchasesTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
 
             <!-- DASHBOARD -->
 
@@ -1123,7 +1298,6 @@
 
     <!-- JAVASCRIPT -->
 
-    <script src="js/app.js"></script>
-
+    <script src="./js/app.js"></script>
 </body>
 </html>
