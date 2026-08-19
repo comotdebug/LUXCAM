@@ -1,4 +1,4 @@
-const products = [
+const defaultProducts = [
     {id:1,name:"Sony Alpha A7 III",category:"Kamera",price:18500000,stock:5,badge:"BEST SELLER"},
     {id:2,name:"Canon EOS R10",category:"Kamera",price:11900000,stock:7,badge:"POPULAR"},
     {id:3,name:"Fujifilm X-S20",category:"Kamera",price:15900000,stock:4,badge:"NEW"},
@@ -11,6 +11,8 @@ const products = [
     {id:10,name:"Rode VideoMic GO II",category:"Audio",price:1800000,stock:9,badge:"AUDIO"}
 ];
 
+let products = JSON.parse(localStorage.getItem("lux_products") || "null") || defaultProducts;
+
 const paymentMethods = {
     ewallet:["DANA","OVO","GoPay","ShopeePay","LinkAja"],
     bank:["BCA","BRI","BNI","Mandiri","BSI"],
@@ -22,6 +24,13 @@ let user = JSON.parse(localStorage.getItem("lux_user") || "null");
 let cart = JSON.parse(localStorage.getItem("lux_cart") || "[]");
 let orders = JSON.parse(localStorage.getItem("lux_orders") || "[]");
 let stock = JSON.parse(localStorage.getItem("lux_stock") || "null");
+let suppliers = JSON.parse(localStorage.getItem("lux_suppliers") || "[]");
+let purchases = JSON.parse(localStorage.getItem("lux_purchases") || "[]");
+
+products.forEach(p => {
+    if (p.buyPrice == null) p.buyPrice = Math.round(p.price * 0.8);
+    if (!p.supplier) p.supplier = "LUXCAM Supplier";
+});
 
 if (!stock) {
     stock = {};
@@ -47,6 +56,9 @@ function save() {
     localStorage.setItem("lux_cart",JSON.stringify(cart));
     localStorage.setItem("lux_orders",JSON.stringify(orders));
     localStorage.setItem("lux_stock",JSON.stringify(stock));
+    localStorage.setItem("lux_products",JSON.stringify(products));
+    localStorage.setItem("lux_suppliers",JSON.stringify(suppliers));
+    localStorage.setItem("lux_purchases",JSON.stringify(purchases));
 }
 
 
@@ -949,6 +961,10 @@ function renderAdmin() {
     renderChart();
     renderStock();
     renderOrders();
+    renderAdminProducts();
+    renderSuppliers();
+    renderPurchases();
+    updateAdminSelects();
 }
 
 
@@ -1110,6 +1126,8 @@ function resetDemo() {
 
     orders = [];
     cart = [];
+    suppliers = [];
+    purchases = [];
 
     stock = {};
 
@@ -1151,3 +1169,245 @@ document.addEventListener("keydown",e => {
     }
 
 });
+
+/* =====================================================
+   ADMIN INVENTORY / SUPPLIER / PURCHASE MANAGEMENT
+===================================================== */
+
+function adminProductSubmit(e) {
+    e.preventDefault();
+
+    const editId = Number(document.getElementById("adminProductId").value || 0);
+    const name = document.getElementById("adminProductName").value.trim();
+    const categoryValue = document.getElementById("adminProductCategory").value;
+    const buyPrice = Number(document.getElementById("adminProductBuyPrice").value);
+    const sellPrice = Number(document.getElementById("adminProductSellPrice").value);
+    const stockValue = Number(document.getElementById("adminProductStock").value);
+    const supplier = document.getElementById("adminProductSupplier").value.trim();
+    const badge = document.getElementById("adminProductBadge").value.trim() || "NEW";
+    const image = document.getElementById("adminProductImage").value.trim();
+
+    if (!name || !categoryValue || buyPrice < 0 || sellPrice < 0 || stockValue < 0) {
+        toast("Data barang belum lengkap.");
+        return;
+    }
+
+    if (editId) {
+        const p = product(editId);
+        if (!p) return;
+        p.name = name;
+        p.category = categoryValue;
+        p.buyPrice = buyPrice;
+        p.price = sellPrice;
+        p.supplier = supplier;
+        p.badge = badge;
+        p.image = image;
+        stock[editId] = stockValue;
+        toast("Barang berhasil diperbarui ✓");
+    } else {
+        const id = products.length
+            ? Math.max(...products.map(p => Number(p.id))) + 1
+            : 1;
+
+        products.push({
+            id,
+            name,
+            category: categoryValue,
+            price: sellPrice,
+            buyPrice,
+            stock: stockValue,
+            badge,
+            supplier,
+            image
+        });
+
+        stock[id] = stockValue;
+        toast("Barang berhasil ditambahkan ✓");
+    }
+
+    save();
+    resetAdminProductForm();
+    renderAdmin();
+    renderProducts();
+}
+
+function editAdminProduct(id) {
+    const p = product(id);
+    if (!p) return;
+
+    document.getElementById("adminProductId").value = p.id;
+    document.getElementById("adminProductName").value = p.name;
+    document.getElementById("adminProductCategory").value = p.category;
+    document.getElementById("adminProductBuyPrice").value = p.buyPrice ?? 0;
+    document.getElementById("adminProductSellPrice").value = p.price;
+    document.getElementById("adminProductStock").value = stock[p.id] ?? 0;
+    document.getElementById("adminProductSupplier").value = p.supplier || "";
+    document.getElementById("adminProductBadge").value = p.badge || "";
+    document.getElementById("adminProductImage").value = p.image || "";
+    document.getElementById("adminProductFormTitle").textContent = "Edit Barang";
+    document.getElementById("adminProductSubmit").textContent = "Simpan Perubahan";
+    document.getElementById("adminProductForm").scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+function deleteAdminProduct(id) {
+    const p = product(id);
+    if (!p) return;
+    if (!confirm(`Hapus ${p.name}?`)) return;
+
+    products = products.filter(x => x.id !== id);
+    delete stock[id];
+    save();
+    renderAdmin();
+    renderProducts();
+    toast("Barang dihapus.");
+}
+
+function resetAdminProductForm() {
+    const form = document.getElementById("adminProductForm");
+    if (!form) return;
+    form.reset();
+    document.getElementById("adminProductId").value = "";
+    document.getElementById("adminProductFormTitle").textContent = "Input Barang";
+    document.getElementById("adminProductSubmit").textContent = "Tambah Barang";
+}
+
+function renderAdminProducts() {
+    const table = document.getElementById("adminProductsTable");
+    if (!table) return;
+
+    table.innerHTML = products.map(p => {
+        const s = stock[p.id] ?? 0;
+        const buy = p.buyPrice ?? 0;
+        const margin = p.price - buy;
+        return `
+            <tr>
+                <td><strong>${p.name}</strong><small>${p.category}</small></td>
+                <td>${rupiah(buy)}</td>
+                <td class="admin-price">${rupiah(p.price)}</td>
+                <td>${rupiah(margin)}</td>
+                <td>${s}</td>
+                <td>${p.supplier || "-"}</td>
+                <td class="admin-actions">
+                    <button onclick="editAdminProduct(${p.id})">Edit</button>
+                    <button class="danger-btn" onclick="deleteAdminProduct(${p.id})">Hapus</button>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+function addSupplier(e) {
+    e.preventDefault();
+    const name = document.getElementById("supplierName").value.trim();
+    const phone = document.getElementById("supplierPhone").value.trim();
+    const address = document.getElementById("supplierAddress").value.trim();
+    if (!name) return toast("Nama supplier wajib diisi.");
+
+    suppliers.unshift({
+        id: "SUP-" + Date.now().toString().slice(-6),
+        name, phone, address,
+        date: new Date().toISOString()
+    });
+    save();
+    document.getElementById("supplierForm").reset();
+    updateAdminSelects();
+    renderSuppliers();
+    toast("Supplier ditambahkan ✓");
+}
+
+function deleteSupplier(id) {
+    if (!confirm("Hapus supplier ini?")) return;
+    suppliers = suppliers.filter(s => s.id !== id);
+    save();
+    updateAdminSelects();
+    renderSuppliers();
+}
+
+function renderSuppliers() {
+    const table = document.getElementById("suppliersTable");
+    if (!table) return;
+    if (!suppliers.length) {
+        table.innerHTML = `<tr><td colspan="4">Belum ada supplier.</td></tr>`;
+        return;
+    }
+    table.innerHTML = suppliers.map(s => `
+        <tr>
+            <td><strong>${s.name}</strong></td>
+            <td>${s.phone || "-"}</td>
+            <td>${s.address || "-"}</td>
+            <td><button class="danger-btn" onclick="deleteSupplier('${s.id}')">Hapus</button></td>
+        </tr>
+    `).join("");
+}
+
+function updateAdminSelects() {
+    const supplierSelect = document.getElementById("purchaseSupplier");
+    if (supplierSelect) {
+        supplierSelect.innerHTML = `<option value="">Pilih supplier</option>` +
+            suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join("");
+    }
+
+    const productSelect = document.getElementById("purchaseProduct");
+    if (productSelect) {
+        productSelect.innerHTML = `<option value="">Pilih barang</option>` +
+            products.map(p => `<option value="${p.id}">${p.name}</option>`).join("");
+    }
+
+    const count = document.getElementById("supplierCount");
+    if (count) count.textContent = `${suppliers.length} supplier`;
+}
+
+function recordPurchase(e) {
+    e.preventDefault();
+    const productId = Number(document.getElementById("purchaseProduct").value);
+    const supplier = document.getElementById("purchaseSupplier").value;
+    const qty = Number(document.getElementById("purchaseQty").value);
+    const unitPrice = Number(document.getElementById("purchaseUnitPrice").value);
+    if (!productId || !supplier || qty <= 0 || unitPrice < 0) {
+        return toast("Data pembelian belum lengkap.");
+    }
+
+    const p = product(productId);
+    if (!p) return;
+
+    stock[productId] = (stock[productId] ?? 0) + qty;
+    p.buyPrice = unitPrice;
+    p.supplier = supplier;
+
+    purchases.unshift({
+        id: "PUR-" + Date.now().toString().slice(-7),
+        productId,
+        productName: p.name,
+        supplier,
+        qty,
+        unitPrice,
+        total: qty * unitPrice,
+        date: new Date().toISOString()
+    });
+
+    save();
+    document.getElementById("purchaseForm").reset();
+    renderAdmin();
+    renderProducts();
+    toast("Pembelian supplier dicatat ✓");
+}
+
+function renderPurchases() {
+    const table = document.getElementById("purchasesTable");
+    if (!table) return;
+    if (!purchases.length) {
+        table.innerHTML = `<tr><td colspan="7">Belum ada pembelian supplier.</td></tr>`;
+        return;
+    }
+    table.innerHTML = purchases.slice(0,30).map(x => `
+        <tr>
+            <td>${x.id}</td>
+            <td>${new Date(x.date).toLocaleDateString("id-ID")}</td>
+            <td>${x.productName}</td>
+            <td>${x.supplier}</td>
+            <td>${x.qty}</td>
+            <td>${rupiah(x.unitPrice)}</td>
+            <td>${rupiah(x.total)}</td>
+        </tr>
+    `).join("");
+}
