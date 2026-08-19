@@ -2551,3 +2551,209 @@ td {
     }
 
 }
+
+/* =====================================================
+   ADMIN MANAGEMENT EXTENSIONS
+===================================================== */
+
+.admin-management {
+    padding: 35px 8% 0;
+}
+
+.admin-management:last-of-type {
+    padding-bottom: 30px;
+}
+
+.admin-management-header {
+    margin-bottom: 18px;
+}
+
+.admin-management-header h2 {
+    font-size: 30px;
+    letter-spacing: -1.5px;
+    margin-bottom: 7px;
+}
+
+.admin-management-header h2 span {
+    color: var(--gold);
+}
+
+.admin-management-header p:not(.label) {
+    color: #777;
+    font-size: 12px;
+}
+
+.admin-management-grid {
+    display: grid;
+    grid-template-columns: minmax(300px, .75fr) minmax(0, 1.7fr);
+    gap: 13px;
+}
+
+.admin-form-card,
+.admin-table-card {
+    min-width: 0;
+}
+
+.admin-form-card form label {
+    display: block;
+    color: #aaa;
+    font-size: 10px;
+    margin: 0 0 12px;
+}
+
+.admin-form-card input,
+.admin-form-card select,
+.admin-form-card textarea,
+.purchase-form-card select,
+.purchase-form-card input {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    padding: 11px 12px;
+    border: 1px solid #292929;
+    border-radius: 7px;
+    outline: none;
+    background: #0a0a0a;
+    color: var(--white);
+    font-size: 11px;
+    resize: vertical;
+}
+
+.admin-form-card input:focus,
+.admin-form-card select:focus,
+.admin-form-card textarea:focus,
+.purchase-form-card select:focus,
+.purchase-form-card input:focus {
+    border-color: var(--gold-dark);
+}
+
+.admin-form-two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.admin-form-four {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.admin-form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.admin-form-actions .secondary-button {
+    margin-top: 0;
+}
+
+.admin-table-scroll {
+    overflow-x: auto;
+}
+
+.admin-data-table {
+    min-width: 780px;
+}
+
+.admin-data-table td small {
+    display: block;
+    margin-top: 3px;
+    color: #666;
+    font-size: 8px;
+}
+
+.admin-data-table .admin-price {
+    color: var(--gold);
+    font-weight: 700;
+}
+
+.admin-actions {
+    white-space: nowrap;
+}
+
+.admin-actions button,
+.danger-btn {
+    padding: 7px 9px;
+    border: 1px solid #303030;
+    border-radius: 6px;
+    background: #191919;
+    color: var(--white);
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.admin-actions button:hover {
+    border-color: var(--gold-dark);
+    color: var(--gold);
+}
+
+.danger-btn:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.purchase-form-card {
+    margin-bottom: 13px;
+}
+
+.purchase-form-card form {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.purchase-form-card .admin-form-four {
+    flex: 1;
+}
+
+.purchase-form-card .primary-button {
+    flex-shrink: 0;
+    margin-bottom: 12px;
+}
+
+.admin-purchase-table {
+    margin-bottom: 25px;
+}
+
+@media (max-width: 950px) {
+    .admin-management-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-form-four {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .purchase-form-card form {
+        display: block;
+    }
+
+    .purchase-form-card .primary-button {
+        width: 100%;
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .admin-management {
+        padding-left: 6%;
+        padding-right: 6%;
+    }
+
+    .admin-management-header h2 {
+        font-size: 26px;
+    }
+
+    .admin-form-two,
+    .admin-form-four {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-form-actions {
+        flex-direction: column;
+    }
+
+    .admin-form-actions button {
+        width: 100%;
+    }
+}
